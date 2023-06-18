@@ -3,7 +3,15 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
-
+let
+  nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
+    export __NV_PRIME_RENDER_OFFLOAD=1
+    export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
+    export __GLX_VENDOR_LIBRARY_NAME=nvidia
+    export __VK_LAYER_NV_optimus=NVIDIA_only
+    exec "$@"
+  '';
+in
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -57,8 +65,19 @@
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.opengl.enable = true;
 
-  # nvidia-drm.modeset=1 is required for some wayland compositors, e.g. sway
-  hardware.nvidia.modesetting.enable = true;
+  hardware.nvidia = {
+    # nvidia-drm.modeset=1 is required for some wayland compositors, e.g. sway
+    modesetting.enable = true;
+    prime = {
+      offload.enable = true;
+
+      # Bus ID of the Intel GPU. You can find it using lspci, either under 3D or VGA
+      intelBusId = "PCI:0:2:0";
+
+      # Bus ID of the NVIDIA GPU. You can find it using lspci, either under 3D or VGA
+      nvidiaBusId = "PCI:1:0:0";
+    };
+  };
 
   # Configure keymap in X11
   services.xserver = {
@@ -117,8 +136,7 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
+    nvidia-offload
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -139,6 +157,13 @@
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
+
+  # Copy the NixOS configuration file and link it from the resulting system
+  # (/run/current-system/configuration.nix). This is useful in case you
+  # accidentally delete configuration.nix.
+  system.copySystemConfiguration = true;
+  system.autoUpgrade.enable = true;  
+  system.autoUpgrade.allowReboot = true; 
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

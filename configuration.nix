@@ -19,8 +19,18 @@ in
     ];
 
   # Bootloader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader = {
+    grub = {
+      enable = true;
+      efiSupport = true;
+      devices = [ "nodev" ];
+      useOSProber = true;
+    };
+    efi = {
+      canTouchEfiVariables = true;
+      efiSysMountPoint = "/boot";
+    };
+  };
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -34,6 +44,7 @@ in
 
   # Set your time zone.
   time.timeZone = "America/Sao_Paulo";
+  time.hardwareClockInLocalTime = true;
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -59,11 +70,23 @@ in
 
   # Remove some NixOS default app
   services.xserver.excludePackages = [ pkgs.xterm ];
-  environment.gnome.excludePackages = [ pkgs.gnome.gnome-music pkgs.gnome.gedit pkgs.epiphany pkgs.gnome.totem pkgs.gnome-tour ];
+  environment.gnome.excludePackages = [
+    pkgs.gnome.gnome-music
+    pkgs.gnome.gedit
+    pkgs.epiphany
+    pkgs.gnome.yelp
+    pkgs.gnome-tour
+    pkgs.gnome.geary
+    pkgs.gnome.seahorse
+  ];
 
   # Nvidia
   services.xserver.videoDrivers = [ "nvidia" ];
-  hardware.opengl.enable = true;
+  hardware.opengl = {
+    enable = true;
+    driSupport = true;
+    driSupport32Bit = true;
+  };
 
   hardware.nvidia = {
     # nvidia-drm.modeset=1 is required for some wayland compositors, e.g. sway
@@ -124,11 +147,11 @@ in
   };
 
   # Gaming
-	programs.steam = {
-	  enable = true;
-	  remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-	  dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-	};
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
+    dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
+  };
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -162,8 +185,8 @@ in
   # (/run/current-system/configuration.nix). This is useful in case you
   # accidentally delete configuration.nix.
   system.copySystemConfiguration = true;
-  system.autoUpgrade.enable = true;  
-  system.autoUpgrade.allowReboot = true; 
+  system.autoUpgrade.enable = true;
+  system.autoUpgrade.allowReboot = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
@@ -172,5 +195,4 @@ in
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "23.05"; # Did you read the comment?
-
 }

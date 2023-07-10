@@ -132,12 +132,16 @@
     description = "Diogo Autilio";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
-      firefox
-      neofetch
-      git
-      steam
-      vscode
       cider
+      discord
+      firefox
+      git
+      gnome.gnome-boxes
+      neofetch
+      steam
+      stremio
+      transmission-gtk
+      vscode
     ];
   };
 

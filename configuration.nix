@@ -52,6 +52,9 @@
     LC_TIME = "pt_BR.UTF-8";
   };
 
+  # Enable Flatpak.
+  services.flatpak.enable = true;
+
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 

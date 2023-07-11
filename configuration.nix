@@ -135,6 +135,7 @@
     description = "Diogo Autilio";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
+      appimage-run
       cider
       discord
       firefox

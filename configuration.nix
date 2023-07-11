@@ -149,6 +149,15 @@
     ];
   };
 
+  # Show diff after update
+  system.activationScripts.diff = ''
+    if [[ -e /run/current-system ]]; then
+      ${pkgs.nix}/bin/nix \
+      --extra-experimental-features 'nix-command' \
+      store diff-closures /run/current-system "$systemConfig"
+    fi
+  '';
+
   # Gaming
   programs.steam = {
     enable = true;
